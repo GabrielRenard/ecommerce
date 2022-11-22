@@ -1,18 +1,32 @@
 import React from "react";
+import { client } from "../lib/client";
 import { Product, FooterBanner, HeroBanner } from "../components";
 
-const Home = () => {
+const Home = ({ products, bannerData }) => {
   return (
     <>
-      <HeroBanner />
-      <div>
+      <HeroBanner heroBanner={bannerData.length && bannerData[0]} />
+      <div className="products-heading">
         <h2>Best Selling Products</h2>
         <p>Speakers of many variations</p>
       </div>
-      <div>{["product 1, product 2"].map(product => product)}</div>
+      <div>{products?.map(product => product.name)}</div>
       <FooterBanner />
     </>
   );
+};
+
+// Next JS uses getServerSideProps instead of useEffect:
+export const getServerSideProps = async () => {
+  const query = '*[_type == "product"]'; // Grab all products from sanity dashboard
+  const products = await client.fetch(query);
+
+  const bannerQuery = '*[_type == "banner"]';
+  const bannerData = await client.fetch(bannerQuery);
+
+  return {
+    props: { products, bannerData },
+  };
 };
 
 export default Home;
